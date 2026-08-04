@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sessions  Session[]
+}
+
+model Session {
+  id           String         @id @default(uuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id])
+  token        String         @unique
+  createdAt    DateTime       @default(now())
+  expiresAt    DateTime
+  activities   Activity[]
+  screenshots  Screenshot[]
+}
+
+model Activity {
+  id             String   @id @default(uuid())
+  sessionId      String
+  session        Session  @relation(fields: [sessionId], references: [id])
+  
+  type           String   // click, scroll, keyboard, navigation, tab_switch, window_focus
+  url            String
+  title          String?
+  timestamp      BigInt
+  
+  // Click specific
+  x              Int?
+  y              Int?
+  elementTag     String?
+  text           String?
+  
+  // Scroll specific
+  scrollPosition Int?
+  pageHeight     Int?
+  viewportHeight Int?
+  
+  // Keyboard specific
+  keyCount       Int?
+  typingSpeed    Int?
+  focusedElement String?
+
+  createdAt      DateTime @default(now())
+}
+
+model Screenshot {
+  id             String          @id @default(uuid())
+  sessionId      String
+  session        Session         @relation(fields: [sessionId], references: [id])
+  
+  url            String
+  title          String?
+  timestamp      BigInt
+  imagePath      String          // Path or URL to the stored image
+  
+  ocrResult      OCRResult?
+  visionAnalysis VisionAnalysis?
+
+  createdAt      DateTime        @default(now())
+}
+
+model OCRResult {
+  id             String     @id @default(uuid())
+  screenshotId   String     @unique
+  screenshot     Screenshot @relation(fields: [screenshotId], references: [id])
+  
+  text           String     
+  createdAt      DateTime   @default(now())
+}
+
+model VisionAnalysis {
+  id             String     @id @default(uuid())
+  screenshotId   String     @unique
+  screenshot     Screenshot @relation(fields: [screenshotId], references: [id])
+  
+  summary        String     
+  visibleUI      String     
+  detectedApp    String?
+  
+  createdAt      DateTime   @default(now())
+}
