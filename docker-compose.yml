@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:15-alpine
@@ -10,6 +12,32 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  server:
+    build: 
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: visual-ai-server
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://visual_user:visual_password@db:5432/visual_db?schema=public
+      - JWT_SECRET=super-secret-key-for-jwt
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    container_name: visual-ai-dashboard
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
     restart: unless-stopped
 
 volumes:
