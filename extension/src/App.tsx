@@ -5,9 +5,9 @@ export default function App() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    chrome.storage.local.get(['apiToken'], (result) => {
+    chrome.storage.local.get(['apiToken'], (result: any) => {
       if (result.apiToken) {
-        setToken(result.apiToken);
+        setToken(result.apiToken as string);
       }
     });
   }, []);

@@ -1,1 +1,15 @@
-{ "name": "visual-ai-agent", "version": "1.0.0", "private": true, "workspaces": [ "server", "extension", "shared", "dashboard" ] }
+{
+  "name": "visual-ai-agent",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "server",
+    "extension",
+    "shared",
+    "dashboard"
+  ],
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "node-fetch": "^3.3.2"
+  }
+}

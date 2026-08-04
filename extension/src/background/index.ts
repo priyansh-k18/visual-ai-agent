@@ -4,11 +4,11 @@ let activityBatch: Activity[] = [];
 let apiToken = '';
 
 // Load token
-chrome.storage.local.get(['apiToken'], (res) => {
-  if (res.apiToken) apiToken = res.apiToken;
+chrome.storage.local.get(['apiToken'], (res: any) => {
+  if (res.apiToken) apiToken = res.apiToken as string;
 });
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes.apiToken) apiToken = changes.apiToken.newValue;
+chrome.storage.onChanged.addListener((changes: any) => {
+  if (changes.apiToken) apiToken = changes.apiToken.newValue as string;
 });
 
 // Receive activities from content scripts
@@ -69,7 +69,8 @@ async function syncActivities() {
   if (!apiToken) return;
   
   // Also load any queued activities from storage
-  const { offlineQueue = [] } = await chrome.storage.local.get('offlineQueue');
+  const storageResult: any = await chrome.storage.local.get('offlineQueue');
+  const offlineQueue = storageResult.offlineQueue || [];
   const allActivities = [...offlineQueue, ...activityBatch];
   
   if (allActivities.length === 0) return;
