@@ -153,6 +153,36 @@ async function processScreenshot(screenshotId: string, base64Image: string) {
   }
 }
 
+app.get('/dashboard', authenticateToken, async (req: Request | any, res) => {
+  try {
+    const sessionId = req.sessionId;
+    const activities = await prisma.activity.findMany({
+      where: { sessionId },
+      orderBy: { timestamp: 'desc' },
+      take: 50
+    });
+    
+    const screenshots = await prisma.screenshot.findMany({
+      where: { sessionId },
+      orderBy: { timestamp: 'desc' },
+      take: 20,
+      include: {
+        ocrResult: true,
+        visionAnalysis: true
+      }
+    });
+    
+    // We need to convert BigInt to Number for JSON serialization
+    const serializeActivities = activities.map(a => ({ ...a, timestamp: Number(a.timestamp) }));
+    const serializeScreenshots = screenshots.map(s => ({ ...s, timestamp: Number(s.timestamp) }));
+
+    res.status(200).json({ activities: serializeActivities, screenshots: serializeScreenshots });
+  } catch (error) {
+    logger.error('Dashboard fetch error', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
